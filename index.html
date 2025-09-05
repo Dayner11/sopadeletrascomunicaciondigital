@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sopa de Letras - COMUNICACION DIGITAL</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  h1, h2 { text-align: center; }
+  #score { border: 2px solid #4CAF50; padding: 10px; max-width: 400px; margin: 10px auto; border-radius: 8px; color: #2E7D32; }
+  #word-list { margin: 10px auto; max-width: 600px; text-align: center; }
+  .word { display: inline-block; margin: 5px 10px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; cursor: default; }
+  .found { background-color: #a5d6a7; text-decoration: line-through; }
+  #grid { display: grid; grid-template-columns: repeat(20, 24px); grid-gap: 2px; justify-content: center; margin: 20px auto; max-width: fit-content; }
+  .cell {
+    width: 24px; height: 24px;
+    border: 1px solid #999;
+    text-align: center;
+    line-height: 24px;
+    user-select: none;
+    cursor: pointer;
+  }
+  .selected { background-color: #ffeb3b; }
+  button { margin: 10px 5px; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
+  #print-btn { background-color: #2196F3; color: white; }
+  #show-solution-btn { background-color: #FFC107; color: black; }
+  input[type=text] { width: 200px; padding: 5px; margin: 10px auto; display: block; }
+</style>
+</head>
+<body>
+
+<h1>Comunicación Digital</h1>
+<h2>Introducción</h2>
+
+<div id="score">
+  <strong>Puntuación:</strong> <span id="points">0 pts</span><br />
+  Palabras: <span id="found-count">0</span>/<span id="total-words">0</span> | Aciertos: <span id="hits">0</span> | Errores: <span id="errors">0</span>
+</div>
+
+<label for="player-name">Tu nombre:</label>
+<input type="text" id="player-name" placeholder="Nombre" />
+
+<div id="word-list"></div>
+
+<div id="grid"></div>
+
+<div style="text-align:center;">
+  <button id="print-btn">Imprimir Resultado</button>
+  <button id="show-solution-btn">Mostrar Solución</button>
+</div>
+
+<script>
+  // Palabras a buscar
+  const words = ["INTERNET","NUBE","PODCAST","SERVIDOR","COOKIE","DISCORD","COMUNICACION","SOCIAL","CORREO"];
+  const gridSize = 20;
+  
+  // Variables globales
+  let foundWords = new Set();
+  let errors = 0;
+  let hits = 0;
+  let points = 0;
+  let startTime = Date.now();
+
+  // Mostrar lista de palabras
+  const wordListDiv = document.getElementById('word-list');
+  wordListDiv.innerHTML = words.map(w => `<span class="word" id="word-${w}">${w}</span>`).join(' ');
+
+  // Crear una matriz vacía
+  let grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
+
+  // Función para colocar palabras en la matriz
+  function placeWords(words) {
+    // En este ejemplo simple sólo se colocan verticales de arriba a abajo o horizontal de izquierda a derecha
+    // ... Se debería mejorar para diferentes direcciones y evitar overlaps incorrectos
+    
+    let directions = [
+      [0, 1], // horizontal derecha
+      [1, 0]  // vertical abajo
+    ];
+    
+    for (const word of words) {
+      let placed = false;
+      let tries = 0;
+      while (!placed && tries < 100) {
+        tries++;
+        let dir = directions[Math.floor(Math.random() * directions.length)];
+        let row = Math.floor(Math.random() * gridSize);
+        let col = Math.floor(Math.random() * gridSize);
+
+        // Verifico si cabe la palabra
+        let endRow = row + dir[0] * (word.length -1);
+        let endCol = col + dir[1] * (word.length -1);
+        if (endRow < gridSize && endCol < gridSize) {
+          // verifico espacio
+          let canPlace = true;
+          for (let i=0; i<word.length; i++) {
+            let r = row + dir[0]*i;
+            let c = col + dir[1]*i;
+            if (grid[r][c] !== '' && grid[r][c] !== word[i]) {
+              canPlace = false;
+              break;
+            }
+          }
+          if (canPlace) {
+            for (let i=0; i<word.length; i++) {
+              let r = row + dir[0]*i;
+              let c = col + dir[1]*i;
+              grid[r][c] = word[i];
+            }
+            placed = true;
+          }
+        }
+      }
+      if (!placed) {
+        console.warn("No se pudo colocar la palabra", word);
+      }
+    }
+  }
+
+  // Llenar celdas vacías con letras aleatorias
+  function fillRandomLetters() {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÑ";
+    for (let r=0; r<gridSize; r++) {
+      for (let c=0; c<gridSize; c++) {
+        if (grid[r][c]==='') {
+          grid[r][c] = letters.charAt(Math.floor(Math.random()*letters.length));
+        }
+      }
+    }
+  }
+
+  // Mostrar cuadrícula en el DOM
+  const gridDiv = document.getElementById('grid');
+
+  function renderGrid() {
+    gridDiv.innerHTML = '';
+    for (let r=0; r<gridSize; r++) {
+      for (let c=0; c<gridSize; c++) {
+        let cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = grid[r][c];
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        gridDiv.appendChild(cell);
+      }
+    }
+  }
+
+  // Lógica para selección de letras y detección de palabra encontrada (muy básico)
+  let selection = [];
+  let isSelecting = false;
+
+  function getWordFromSelection(sel) {
+    return sel.map(cell => cell.textContent).join('');
+  }
+
+  // Buscar palabra en la lista en todas las direcciones (para validar selección)
+  function checkWord(word) {
+    return words.includes(word) && !foundWords.has(word);
+  }
+
+  gridDiv.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('cell')) {
+      selection = [e.target];
+      e.target.classList.add('selected');
+      isSelecting = true;
+    }
+  });
+
+  gridDiv.addEventListener('mouseover', e => {
+    if (isSelecting && e.target.classList.contains('cell')) {
+      if (!selection.includes(e.target)) {
+        selection.push(e.target);
+        e.target.classList.add('selected');
+      }
+    }
+  });
+
+  window.addEventListener('mouseup', e => {
+    if (isSelecting) {
+      isSelecting = false;
+      const word = getWordFromSelection(selection);
+      if (checkWord(word)) {
+        // Marcar palabra encontrada
+        foundWords.add(word);
+        hits++;
+        points += word.length * 100; // ejemplo de puntaje
+        document.getElementById(`word-${word}`).classList.add('found');
+      } else {
+        errors++;
+      }
+      updateScore();
+      clearSelection();
+    }
+  });
+
+  function clearSelection() {
+    for (const cell of selection) {
+      cell.classList.remove('selected');
+    }
+    selection = [];
+  }
+
+  function updateScore() {
+    document.getElementById('points').textContent = points + ' pts';
+    document.getElementById('found-count').textContent = foundWords.size;
+    document.getElementById('total-words').textContent = words.length;
+    document.getElementById('hits').textContent = hits;
+    document.getElementById('errors').textContent = errors;
+  }
+
+  // Mostrar solución (resaltar todas las palabras)
+  function showSolution() {
+    // Aquí deberías almacenar las posiciones de las palabras para resaltarlas
+    // Como esta función es demo, sólo cambiamos color de palabras encontradas y no encontradas:
+    for (const w of words) {
+      if (!foundWords.has(w)) {
+        document.getElementById(`word-${w}`).style.backgroundColor = '#ffccbc';
+      }
+    }
+  }
+
+  // Imprimir resultado como una nueva ventana
+  function printResult() {
+    let name = document.getElementById('player-name').value || 'Anónimo';
+    let timeElapsed = Math.floor((Date.now() - startTime)/1000);
+    let content = `
+      <h2>Sopa de Letras Resuelta</h2>
+      <p><strong>Nombre:</strong> ${name}</p>
+      <p><strong>Tiempo:</strong> ${Math.floor(timeElapsed/60).toString().padStart(2,'0')}:${(timeElapsed%60).toString().padStart(2,'0')}</p>
+      <p><strong>Puntuación:</strong> ${points} puntos</p>
+      <p><strong>Palabras encontradas:</strong> ${foundWords.size} de ${words.length}</p>
+      <h3>Palabras no encontradas</h3>
+      <ul>
+        ${words.filter(w => !foundWords.has(w)).map(w => `<li>${w}</li>`).join('')}
+      </ul>
+    `;
+    const printWindow = window.open('', '', 'width=600,height=400');
+    printWindow.document.write(`<html><head><title>Resultado de Sopa de Letras</title></head><body>${content}</body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  }
+
+  // Inicialización
+  placeWords(words);
+  fillRandomLetters();
+  renderGrid();
+  updateScore();
+
+  document.getElementById('show-solution-btn').onclick = showSolution;
+  document.getElementById('print-btn').onclick = printResult;
+
+</script>
+
+</body>
+</html>
