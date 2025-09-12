@@ -1,0 +1,150 @@
+@charset "utf-8";
+
+body {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    background-image: url(imagenes/fondo.jpg);
+    color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+  }
+  h1, h2 {
+    text-align: center;
+    margin-bottom: 3px;
+  }
+
+ #nom {
+    text-align: center;
+   
+ }
+  #game-container {
+    max-width: 700px;
+    width: 100%;
+    background: #c2c2c2;
+  }
+  #word-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 10px 0;
+    justify-content: center;
+   
+  }
+  .word {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background: #eee;
+    user-select: none;
+ 
+  }
+  .word.found {
+    background-color: #8bc34a;
+    color: white;
+   
+  }
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(20, 1.7em);
+    grid-template-rows: repeat(20, 1.7em);
+    gap: 2px;
+    user-select: none;
+    margin-bottom: 10px;
+    touch-action: manipulation;
+    justify-content: center;
+    align-items: center;
+  
+
+    }
+  .cell {
+    width: 1.7em;
+    height: 1.7em;
+    border: 2px solid #8e0000;
+    padding: 1px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9em;
+    user-select: none;
+    background-color: #f8ffdc;
+    transition: background-color 0.3s ease;
+  }
+  .cell.selected {
+    background-color: #8bcdff;
+    color: #000;
+  }
+  .cell.correct {
+    background-color: #4caf50;
+    color: white;
+    font-weight: bolder;
+  }
+  #info {
+    margin: 10px 0;
+    text-align: center;
+  }
+  #score-panel {
+    padding: 10px;
+    border: 3px solid #8e0000;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    color: #000000;
+    background: #fffb7d;
+    text-align: center;
+  }
+  input[name="player-name"] {
+    width: 200px;
+    padding: 5px 10px;
+    font-size: 1em;
+  }
+
+  button {
+    padding: 10px 15px;
+    margin: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+  }
+  button#show-solution {
+    background-color: #ffca28;
+    color: #333;
+  }
+  button#print-results {
+    background-color: #2196f3;
+    color: white;
+  }
+  /* Responsive */
+  @media (max-width: 480px) {
+    #grid {
+      grid-template-columns: repeat(20, 1.4em);
+      grid-template-rows: repeat(20, 1.4em);
+    }
+    .cell {
+      width: 1.4em;
+      height: 1.4em;
+      font-size: 0.75em;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #printable, #printable * {
+      visibility: visible;
+    }
+    #printable {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      font-size: 12pt;
+    }
+  }
