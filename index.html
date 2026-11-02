@@ -10,7 +10,7 @@
 
 <div id="game-container">
   <h1>SOPA DE LETRAS</h1>
-  <h2>COMUNICACION DIGITAL</h2>
+  <h2>COMUNICACIONY HABILIDADES DIGITALES</h2>
 
   <div id="score-panel" aria-live="polite">
     <strong>Puntuación:</strong> <span id="score">0 pts</span><br/>
@@ -19,7 +19,7 @@
   </div>
 
   <div id="nom"><label for="player-name" style="font-size: 20px;"> Nombre:</label>
-  <input type="text" id="player-name" name="player-name" placeholder="Nombre" /></id>
+  <input type="text" id="player-name" name="player-name" placeholder="Nombre" /></div>
 
   <div id="word-list" aria-label="Lista de palabras a encontrar" role="list"></div>
 
@@ -29,7 +29,7 @@
     <span id="timer">Tiempo: 00:00</span>
   </div>
 
-  <div style="text-align:center;">
+  <div class="button-container">
     <button id="show-solution" type="button">Mostrar Solución</button>
     <button id="print-results" type="button">Imprimir Resultado</button>
   </div>
@@ -50,15 +50,15 @@
 (() => {
   const GRID_SIZE = 20;
   const WORDS = [
-    "CONTENIDO",
-    "DIGITALIZACION",
-    "ALCANCE",
-    "MARKETING",
-    "INTERACCION",
-    "MULTIMEDIA",
-    "REDES",
-    "CORREO",
-    "SEGURIDAD",
+    "EMISOR",
+    "RECEPTOR",
+    "MENSAJE",
+    "CANAL",
+    "GESTOS",
+    "RETROALIMENTACION",
+    "CONTEXTO",
+    "SOLICITUD",
+    "CURRICULUM",
   ];
 
   // Convertir palabras a mayúsculas sin tildes para facilitar búsqueda/colocación
@@ -172,8 +172,7 @@
   function renderGrid(grid) {
     const gridEl = document.getElementById('grid');
     gridEl.innerHTML = '';
-    gridEl.style.gridTemplateColumns = "repeat(" + grid.length + ", 1.7em)";
-    gridEl.style.gridTemplateRows = "repeat(" + grid.length + ", 1.7em)";
+    // El tamaño de la cuadrícula y sus celdas lo controla CSS responsivo.
 
     for(let r = 0; r < grid.length; r++) {
       for(let c = 0; c < grid[r].length; c++) {
@@ -596,8 +595,9 @@
   // Ejecutar inicialización
   window.onload = init;
 })();
-</script>
 
+</script>
+<h4>@DAYNERKORP</h4>
 </body>
 </html>
 
